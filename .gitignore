@@ -5,3 +5,5 @@ results
 tmp
 out
 .*.swp
+logs
+test_output

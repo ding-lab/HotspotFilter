@@ -1,17 +1,20 @@
-# TODO: follow model here: /home/mwyczalk_test/Projects/TinDaisy/mutect-tool/testing/docker_call
+IMAGE="mwyczalkowski/hotspot_filter:20200428"
+
+VCF_A="/data/VCF_A.varscan_snv_vcf.vcf"
+VCF_B="/data/VCF_B.varscan_indel_vcf.vcf"
+BED="/data/test.bed"
+OUT="/data/test_output/HotspotFiltered.vcf"
+
+# This is what we want to run in docker
+CMD_INNER="/bin/bash /opt/HotspotFilter/src/hotspot_filter.sh -A $VCF_A -B $VCF_B -D $BED -o $OUT"
 
 
-IMAGE="mwyczalkowski/varscan_vcf_remap"
-DATD="../demo_data"
+SYSTEM=docker   # docker MGI or compute1
+START_DOCKERD="~/Projects/WUDocker"  # https://github.com/ding-lab/WUDocker.git
 
-# Using python to get absolute path of DATD.  On Linux `readlink -f` works, but on Mac this is not always available
-# see https://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-of-gnus-readlink-f-on-a-mac
-ADATD=$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $DATD)
+VOLUME_MAPPING="../demo_data:/data"
 
-VCF="/data/varscan_snv_vcf.vcf"
-OUT="/data/out/varscan_snv_vcf-remapped.vcf"
-
-CMD="python /opt/varscan_vcf_remap/src/varscan_vcf_remap.py --input $VCF --output $OUT"
-
-docker run -v $ADATD:/data -it $IMAGE $CMD
-
+>&2 echo Launching $IMAGE on $SYSTEM
+CMD_OUTER="bash $START_DOCKERD/start_docker.sh -I $IMAGE -M $SYSTEM -c \"$CMD_INNER\" $@ $VOLUME_MAPPING "
+echo Running: $CMD_OUTER
+eval $CMD_OUTER
