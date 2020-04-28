@@ -1,4 +1,4 @@
-IMAGE="mwyczalkowski/varscan_vcf_remap:20191228"
+IMAGE="mwyczalkowski/HotspotFilter:20200428"
 
 cd ..
 docker build -t $IMAGE -f docker/Dockerfile .

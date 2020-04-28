@@ -1,16 +1,26 @@
-FROM python:3
+# Adapted from https://hub.docker.com/r/zlskidmore/varscan/dockerfile
+# and https://medium.com/@chadlagore/conda-environments-with-docker-82cdc9d25754
+FROM continuumio/miniconda3
+
+MAINTAINER Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+
+RUN conda create -n env python=3.6
+RUN echo "source activate env" > ~/.bashrc
+ENV PATH /opt/conda/envs/env/bin:$PATH
 
 WORKDIR /opt
+# https://github.com/geerlingguy/ansible-role-java/issues/64
+RUN mkdir -p /usr/share/man/man1    
 
-# newer versions of pysam seem to crash on build.
-# alternative is to start with Bioconductor images, e.g., https://quay.io/repository/biocontainers/pysam?tab=info
-RUN pip install PyVCF argparse pysam==0.15.1
-#RUN pip install argparse
-#pip install Cython
-#RUN pip install pysam
-#pip install pysam==0.15.1
+# run update
+RUN apt-get update -y && apt-get install -y \
+    curl \
+    libnss-sss \
+    vim 
 
-RUN apt-get update && apt-get install -y \
-    vim
+# RUN printf 'will cite\n' | parallel --citation
+RUN conda install -c bedtools
 
-COPY . /opt/varscan_vcf_remap
+COPY . /opt/Varscan_GermlineCaller
+
+

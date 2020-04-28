@@ -1,2 +1,2 @@
-IMAGE="mwyczalkowski/varscan_vcf_remap:20191228"
+IMAGE="mwyczalkowski/HotspotFilter:20200428"
 docker push $IMAGE
