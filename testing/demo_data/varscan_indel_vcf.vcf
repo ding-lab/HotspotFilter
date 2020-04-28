@@ -15,7 +15,7 @@
 ##FORMAT=<ID=DP4,Number=1,Type=String,Description="Strand read counts: ref/fwd, ref/rev, var/fwd, var/rev">
 ##FILTER=<ID=str10,Description="Less than 10% or more than 90% of variant supporting reads on one strand">
 ##FILTER=<ID=indelError,Description="Likely artifact due to indel reads at this position">
-##FILTER=<ID=vaf,Description="Retain variants where normal VAF <= 0.020000, tumor VAF >= 0.050000, and FILTER=PASS.  Caller = varscan ">
+##FILTER=<ID=vaf,Description="TEST: Retain variants where normal VAF <= 0.000000, tumor VAF >= 0.050000, and FILTER=PASS.  Caller = varscan ">
 ##FILTER=<ID=length,Description="Retain calls where indel length > 0 and < 100 ">
 ##FILTER=<ID=read_depth,Description="Retain calls where read depth in tumor > 14 and normal > 8. Caller = varscan ">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NORMAL	TUMOR

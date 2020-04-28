@@ -3,3 +3,5 @@ output
 old
 results
 tmp
+out
+.*.swp

@@ -117,6 +117,7 @@ if [ ! -z $VCF_B ]; then
     >&2 echo BED = $BED
     # First, write out common header lines
     # from : https://stackoverflow.com/questions/373810/unix-command-to-find-lines-common-in-two-files
+
     awk 'NR==FNR{arr[$0];next} $0 in arr' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_B )  > $OUTFN
 
     # Next, write out header lines unique to A, with _A appended to ID field
@@ -124,10 +125,10 @@ if [ ! -z $VCF_B ]; then
     awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_B ) <( grep "^##" $VCF_A ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_A"; print}' >> $OUTFN
 
     # Then, write out header lines unique to B, with _B appended to ID field
-    awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_A ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_B"; print}' >> $OUTFN
+    awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_B ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_B"; print}' >> $OUTFN
     
     # write out header for filter
-    printf "##FILTER=<ID=hotspot,Description=\"Retain calls: A intersect BED plus B subtract BED.  A=%s, B=%s, BED=%s\">" "$VCF_A" "$VCF_B" "$BED" >> $OUTFN
+    printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED" >> $OUTFN
 
     # Finally, write out CHROM header line
     grep "^#CHROM" $VCF_A >> $OUTFN
@@ -141,9 +142,9 @@ else
     >&2 echo VCF_B not provided
 
     # VCF_B is not specified.  Just write header from VCF_A, add out filter line, and VCF_A which intersects with BED
-    grep "^##" $VCF_A > $OUT_FN
+    grep "^##" $VCF_A > $OUTFN
 
-    printf "##FILTER=<ID=hotspot,Description=\"Retain calls: A intersect BED.  A=%s, BED=%s\">" "$VCF_A" "$BED" >> $OUTFN
+    printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersect BED.  A=%s, BED=%s\">\n" "$VCF_A" "$BED" >> $OUTFN
     grep "^#CHROM" $VCF_A >> $OUTFN
 
     bedtools intersect -a $VCF_A -b $BED >> $OUTFN
