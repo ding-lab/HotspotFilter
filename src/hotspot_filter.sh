@@ -15,7 +15,7 @@ Options:
 -A VCF_A: required
 -B VCF_B: optional
 -D BED: required
--o OUTFN: Output file.  If not specified, write to stdout
+-o OUTFN: required.  Output file.  
 
 Header of VCF_A and VCF_B is merged by retaining all common fields, appending _A, _B to ID field of
 FILTER lines which come from VCF_A and VCF_B, respectively.
@@ -52,7 +52,6 @@ function test_exit_status {
     done
 }
 
-OUTFN="&1"  # output by defalt is to stdout
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
 while getopts ":ho:A:B:D:" opt; do
   case $opt in
@@ -106,6 +105,19 @@ if [ -z $BED ]; then
     >&2 echo "$USAGE" 
     exit 1
 fi
+if [ -z $OUTFN ]; then
+    >&2 echo ERROR: OUTFN not specifid
+    >&2 echo "$USAGE" 
+    exit 1
+fi
+
+# Make the otuput directory and check for success
+OUTD=$(dirname $OUTFN)
+CMD="mkdir -p $OUTD"
+>&2 echo Running: $CMD
+eval $CMD
+test_exit_status
+
 
 # if VCF_B is not defined, then header is obtained just from $VCF_A
 # Otherwise, write out common lines, then per-VCF lines
