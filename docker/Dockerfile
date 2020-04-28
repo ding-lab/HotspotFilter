@@ -18,9 +18,8 @@ RUN apt-get update -y && apt-get install -y \
     libnss-sss \
     vim 
 
-# RUN printf 'will cite\n' | parallel --citation
-RUN conda install -c bedtools
+RUN conda install -c bioconda bedtools
 
-COPY . /opt/Varscan_GermlineCaller
+COPY . /opt/HotspotFilter
 
 

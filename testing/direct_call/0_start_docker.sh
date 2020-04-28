@@ -1,8 +1,14 @@
-IMAGE="mwyczalkowski/varscan_vcf_remap"
-DATD="../demo_data"
+# Launch docker environment for testing mutect-tool
 
-# Using python to get absolute path of DATD.  On Linux `readlink -f` works, but on Mac this is not always available
-# see https://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-of-gnus-readlink-f-on-a-mac
-ADATD=$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $DATD)
+SYSTEM=docker   # MGI and compute1
+IMAGE="mwyczalkowski/hotspot_filter:20200428"
+START_DOCKERD="~/Projects/WUDocker"  # https://github.com/ding-lab/WUDocker.git
 
-docker run -v $ADATD:/data -it $IMAGE /bin/bash
+VOLUME_MAPPING="../demo_data:/data"
+
+# Also need: /storage1/fs1/dinglab/Active/CPTAC3/Common/CPTAC3.catalog
+>&2 echo Launching $IMAGE on $SYSTEM
+CMD="bash $START_DOCKERD/start_docker.sh -I $IMAGE -M $SYSTEM $@ $VOLUME_MAPPING"
+echo Running: $CMD
+eval $CMD
+

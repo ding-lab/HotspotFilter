@@ -1,3 +1,6 @@
+# TODO: follow model here: /home/mwyczalk_test/Projects/TinDaisy/mutect-tool/testing/docker_call
+
+
 IMAGE="mwyczalkowski/varscan_vcf_remap"
 DATD="../demo_data"
 

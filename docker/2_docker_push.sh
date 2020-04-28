@@ -1,2 +1,2 @@
-IMAGE="mwyczalkowski/HotspotFilter:20200428"
+IMAGE="mwyczalkowski/hotspot_filter:20200428"
 docker push $IMAGE
