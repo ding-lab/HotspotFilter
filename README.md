@@ -54,6 +54,46 @@ FILTER lines which come from VCF_A and VCF_B, respectively.
 
 
 
+# Retain VCF_A variants within BED
+# Retain VCF_B variants outside of BED
+
+# Update header 
+# A) get all lines starting with "##" common to both, write out
+# B) get all lines starting with "##" which are unique to A; append `_A` to ID field, write out
+# C) if VCF_B provided, get all lines starting with "##" unique to B, append `_B`, write out
+# D) write out header for filter
+    ##FILTER=<ID=hotspot,Description="Retaining calls where A intersects with BED and B does not intersect with BED.  A=..., B=..., BED=...">
+#   or this, if VCF_B not provided
+    ##FILTER=<ID=hotspot,Description="Retaining calls where A intersect BED.  A=..., BED=..">
+# E) write out CHROM line
+# Write out VCF entries using bedtools:
+# * Sort output of:
+#   A) bedtools intersect VCF_A BED 
+#   B) if VCF_B provided, bedtools subtract VCF_B BED
+
+From `src/hotspot_filter.sh`,
+```
+Retain calls from VCF_A which intersect with BED; optionally, retain calls from
+VCF_B which do not intersect with BED
+
+Usage:
+  my_script.sh [options] ARGS
+
+Options:
+-h: Print this help message
+-A VCF_A: required
+-B VCF_B: optional
+-D BED: required
+-o OUTFN: Output file.  If not specified, write to stdout
+
+Header of VCF_A and VCF_B is merged by retaining all common fields, appending _A, _B to ID field of
+FILTER lines which come from VCF_A and VCF_B, respectively.
+```
+
+
+
+
+
 Starting project to merge VCFs according to BED file
 
 Input:
