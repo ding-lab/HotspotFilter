@@ -19,7 +19,7 @@ inputs:
     type: File
     inputBinding:
       position: 0
-      prefix: '-B'
+      prefix: '-D'
 outputs:
   - id: output
     type: File

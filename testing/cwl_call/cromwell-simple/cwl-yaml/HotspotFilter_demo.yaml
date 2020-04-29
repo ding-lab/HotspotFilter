@@ -1,0 +1,11 @@
+# Template from cwltool --make-template
+
+BED:  # type "File"
+    class: File
+    path: /gscuser/mwyczalk/projects/TinDaisy/HotspotFilter/testing/demo_data/test.bed
+VCF_B:  # type "File" (optional)
+    class: File
+    path: /gscuser/mwyczalk/projects/TinDaisy/HotspotFilter/testing/demo_data/VCF_B.varscan_indel_vcf.vcf
+VCF_A:  # type "File"
+    class: File
+    path: /gscuser/mwyczalk/projects/TinDaisy/HotspotFilter/testing/demo_data/VCF_A.varscan_snv_vcf.vcf

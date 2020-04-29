@@ -28,6 +28,9 @@ EOF
 # E) write out CHROM line
 # F) write out sorted VCF
 
+# specify path explicitly in CWL environment
+BEDTOOLS="/opt/conda/bin/bedtools"
+
 function confirm {
     FN=$1
     WARN=$2
@@ -146,7 +149,7 @@ if [ ! -z $VCF_B ]; then
     grep "^#CHROM" $VCF_A >> $OUTFN
 
     # now write out merged sorted VCF
-    cat <(bedtools intersect -a $VCF_A -b $BED) <(bedtools subtract -a $VCF_B -b $BED) | bedtools sort -i - >> $OUTFN
+    cat <($BEDTOOLS intersect -a $VCF_A -b $BED) <($BEDTOOLS subtract -a $VCF_B -b $BED) | $BEDTOOLS sort -i - >> $OUTFN
 
 else
     >&2 echo Processing VCF_A = $VCF_A
@@ -159,7 +162,7 @@ else
     printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersect BED.  A=%s, BED=%s\">\n" "$VCF_A" "$BED" >> $OUTFN
     grep "^#CHROM" $VCF_A >> $OUTFN
 
-    bedtools intersect -a $VCF_A -b $BED >> $OUTFN
+    $BEDTOOLS intersect -a $VCF_A -b $BED >> $OUTFN
 fi
 
 >&2 echo Written to $OUTFN
