@@ -3,12 +3,14 @@
 
 source /opt/lsf9/conf/lsf.conf
 
-CONFIG="cromwell-config.dat"
+CONFIG="cromwell-config-db.dat"
 
-CWL="../../cwl/varscan_vcf_remap.cwl"
-YAML="demo.yaml"
+#CWL="/gscuser/mwyczalk/projects/TinDaisy/TinDaisy/cwl/mutect-tool/cwl/mutect.cwl"
+CWL="../../../cwl/mutect.cwl"
+YAML="cwl-yaml/mutect-demo.yaml"
 
-CROMWELL="/opt/cromwell.jar"
+
+CROMWELL="/usr/local/cromwell/cromwell-47.jar"
 
 # from https://confluence.ris.wustl.edu/pages/viewpage.action?spaceKey=CI&title=Cromwell#Cromwell-ConnectingtotheDatabase
 # Connecting to the database section
@@ -25,3 +27,4 @@ if [[ $rc != 0 ]]; then
     exit $rc;
 fi
 
+# /gscmnt/gc7210/dinglab/medseq/shared/Users/mwyczalk/ad-hoc/demo-data/Homo_sapiens_assembly19.COST16011_region.dict

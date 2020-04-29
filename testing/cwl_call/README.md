@@ -1,6 +1,11 @@
-Scripts to run as CWL with two workflow managers:
-* [Rabix](https://rabix.io/).  Rabix Executor is no longer maintained but still serves as a lightweight local reference
-* [Cromwell](https://cromwell.readthedocs.io/en/develop/).  Developed specifically for MGI environment
+CWL testing directories
 
-Note: it is suggested that you do not use `conda` to set environment when running Cromwell at MGI, since it pollutes python
-paths and may lead to library not found errors.  Turn off conda with, `conda config --set auto_activate_base false`
+* ./rabix is older testing of CWL under rabix
+* ./cromwell-simple is based on simple cromwell MGI runs here:
+    /gscuser/mwyczalk/projects/TinDaisy/TD-SW-compare/LSCC.202004/CromwellRunner-runs/mutect/mutect.C
+
+Note that better developed scripts for testing both cromwell and rabix in MGI and compute environments exist in 
+GermlineCaller project, e.g.,
+    https://github.com/ding-lab/GATK_GermlineCaller
+    /gscuser/mwyczalk/projects/GermlineCaller/GATK_GermlineCaller/testing/cwl_call
+
