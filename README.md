@@ -52,7 +52,7 @@ FILTER lines which come from VCF_A and VCF_B, respectively.
 
 ## INFO field
 
-We will append an INFO field identifying whether this is from set A or B as a field,
+If VCF_B is specified, append an INFO field identifying whether this is from set A or B as a field,
     HOTSPOT=A / B
 ```
 ##INFO=<ID=HOTSPOT,Number=1,Type=Character,Description="Hotspot filter source">

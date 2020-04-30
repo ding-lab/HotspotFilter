@@ -172,8 +172,8 @@ if [ ! -z $VCF_B ]; then
     test_exit_status 
 
     # write out header for filter
-    printf "##INFO=<ID=HOTSPOT,Number=1,Type=Character,Description=\"Hotspot filter source\">" >> $OUTFN
-    printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED" >> $OUTFN
+    printf "##INFO=<ID=HOTSPOT,Number=1,Type=Character,Description=\"Hotspot filter source\">\n" >> $OUTFN
+    printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED \n" >> $OUTFN
     test_exit_status 
 
     # Finally, write out CHROM header line
@@ -192,13 +192,13 @@ if [ ! -z $VCF_B ]; then
 	TMP_A="$OUTD/VCF_A.BED.tmp"
 
 #   awk from: https://unix.stackexchange.com/questions/148114/how-to-add-words-to-an-existing-column
-    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{$8 = $8 \";HOTSPOT=A\"}1' > $TMP_A"
+    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{\$8 = \$8 \";HOTSPOT=A\"; print}' > $TMP_A"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
 
 	TMP_B="$OUTD/VCF_B.BED.tmp"
-	CMD="$BEDTOOLS subtract -a $VCF_B -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{$8 = $8 \";HOTSPOT=B\"}1' > $TMP_B"
+	CMD="$BEDTOOLS subtract -a $VCF_B -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{\$8 = \$8 \";HOTSPOT=B\"; print}' > $TMP_B"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
