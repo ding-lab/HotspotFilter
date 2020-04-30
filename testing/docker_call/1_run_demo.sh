@@ -1,4 +1,4 @@
-IMAGE="mwyczalkowski/hotspot_filter:20200428"
+IMAGE="mwyczalkowski/hotspot_filter:20200429"
 
 VCF_A="/data/VCF_A.varscan_snv_vcf.vcf"
 VCF_B="/data/VCF_B.varscan_indel_vcf.vcf"
