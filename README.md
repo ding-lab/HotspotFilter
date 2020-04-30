@@ -50,6 +50,12 @@ Header of VCF_A and VCF_B is merged by retaining all common fields, appending _A
 FILTER lines which come from VCF_A and VCF_B, respectively.
 ```
 
+## Future work
+
+Note that errors are not effectively captured here.  For instance, an incorrectly formatted BED file will
+cause this step to quietly fail, emitting header but no variatns, and no error message.  This needs
+to be investigated and errors propagated
+
 # Extra documentation details below
 
 Starting project to merge VCFs according to BED file
