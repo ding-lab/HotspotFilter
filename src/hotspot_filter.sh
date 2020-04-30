@@ -183,14 +183,15 @@ if [ ! -z $VCF_B ]; then
 	# the line below works, but fails silently when BEDTOOLS call fails (e.g., bad BED file)
 	# Instead, we'll write to temp files
     # cat <($BEDTOOLS intersect -a $VCF_A -b $BED ) <($BEDTOOLS subtract -a $VCF_B -b $BED ) | $BEDTOOLS sort -i - >> $OUTFN
+    # We retain intermediate files
 
-	TMP_A="$OUTD/A.tmp"
+	TMP_A="$OUTD/VCF_A.BED.tmp"
     CMD="$BEDTOOLS intersect -a $VCF_A -b $BED > $TMP_A"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
 
-	TMP_B="$OUTD/B.tmp"
+	TMP_B="$OUTD/VCF_B.BED.tmp"
 	CMD="$BEDTOOLS subtract -a $VCF_B -b $BED > $TMP_B"
 	>&2 echo Running $CMD
 	eval $CMD
@@ -200,12 +201,6 @@ if [ ! -z $VCF_B ]; then
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
-
-	CMD="rm -f $TMP_A $TMP_B"
-	>&2 echo Running $CMD
-	eval $CMD
-    test_exit_status 
-
 
 else
     >&2 echo Processing VCF_A = $VCF_A
