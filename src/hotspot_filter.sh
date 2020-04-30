@@ -127,20 +127,24 @@ test_exit_status
 
 # test if VCF_A ends in .gz and uncompress if it does.  Will write intermediate to OUTD
 if [ ${VCF_A##*.} == "gz" ]; then
-    CMD="$GUNZIP $VCF_A"
-    >&2 echo VCF_A is compressed.  Running: $CMD
+	VCF_A_NEW="$OUTD/VCF_A-uncompressed.vcf"
+    CMD="$GUNZIP -c $VCF_A > $VCF_A_NEW"
+    >&2 echo NOTE: $VCF_A is compressed.  
+	>&2 echo "  " Writing to $VCF_A_NEW
+	>&2 echo "  " Running: $CMD
     eval $CMD
     test_exit_status
-    VCF_A=${VCF_A%.*}
-    >&2 echo New VCF_A = $VCF_A
+    VCF_A=$VCF_A_NEW
 fi
-if [ ! -z $VCF_B ] && [${VCF_B##*.} == "gz" ]; then
-    CMD="$GUNZIP $VCF_B"
-    >&2 echo VCF_B is compressed.  Running: $CMD
+if [ ! -z $VCF_B ] && [ ${VCF_B##*.} == "gz" ]; then
+	VCF_B_NEW="$OUTD/VCF_B-uncompressed.vcf"
+    CMD="$GUNZIP -c $VCF_B > $VCF_B_NEW"
+    >&2 echo NOTE: $VCF_B is compressed.  
+	>&2 echo "  "Writing to $VCF_B_NEW
+	>&2 echo "  "Running: $CMD
     eval $CMD
     test_exit_status
-    VCF_B=${VCF_B%.*}
-    >&2 echo New VCF_B = $VCF_B
+    VCF_B=$VCF_B_NEW
 fi
 
 
@@ -155,17 +159,16 @@ if [ ! -z $VCF_B ]; then
     # First, write out common header lines
     # from : https://stackoverflow.com/questions/373810/unix-command-to-find-lines-common-in-two-files
 
-    # Taking care to catch errors in process substitution with "|| kill $$"  See https://unix.stackexchange.com/questions/217605/bash-how-to-propagate-errors-in-process-substitution
-    awk 'NR==FNR{arr[$0];next} $0 in arr' <( grep "^##" $VCF_A || kill $$ ) <( grep "^##" $VCF_B || kill $$ )  > $OUTFN
+    awk 'NR==FNR{arr[$0];next} $0 in arr' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_B )  > $OUTFN
     test_exit_status 
 
     # Next, write out header lines unique to A, with _A appended to ID field
     ##FILTER=<ID=ID,Description="description">
-    awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_B || kill $$ ) <( grep "^##" $VCF_A || kill $$ ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_A"; print}' >> $OUTFN
+    awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_B ) <( grep "^##" $VCF_A ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_A"; print}' >> $OUTFN
     test_exit_status 
 
     # Then, write out header lines unique to B, with _B appended to ID field
-    awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_A || kill $$ ) <( grep "^##" $VCF_B || kill $$ ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_B"; print}' >> $OUTFN
+    awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_B ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_B"; print}' >> $OUTFN
     test_exit_status 
 
     # write out header for filter
@@ -177,8 +180,32 @@ if [ ! -z $VCF_B ]; then
     test_exit_status 
 
     # now write out merged sorted VCF
-    cat <($BEDTOOLS intersect -a $VCF_A -b $BED || kill $$ ) <($BEDTOOLS subtract -a $VCF_B -b $BED || kill $$ ) | $BEDTOOLS sort -i - >> $OUTFN
+	# the line below works, but fails silently when BEDTOOLS call fails (e.g., bad BED file)
+	# Instead, we'll write to temp files
+    # cat <($BEDTOOLS intersect -a $VCF_A -b $BED ) <($BEDTOOLS subtract -a $VCF_B -b $BED ) | $BEDTOOLS sort -i - >> $OUTFN
+
+	TMP_A="$OUTD/A.tmp"
+    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED > $TMP_A"
+	>&2 echo Running $CMD
+	eval $CMD
     test_exit_status 
+
+	TMP_B="$OUTD/B.tmp"
+	CMD="$BEDTOOLS subtract -a $VCF_B -b $BED > $TMP_B"
+	>&2 echo Running $CMD
+	eval $CMD
+    test_exit_status 
+
+	CMD="cat $TMP_A $TMP_B | $BEDTOOLS sort -i - >> $OUTFN"
+	>&2 echo Running $CMD
+	eval $CMD
+    test_exit_status 
+
+	CMD="rm -f $TMP_A $TMP_B"
+	>&2 echo Running $CMD
+	eval $CMD
+    test_exit_status 
+
 
 else
     >&2 echo Processing VCF_A = $VCF_A
@@ -194,7 +221,9 @@ else
     grep "^#CHROM" $VCF_A >> $OUTFN
     test_exit_status 
 
-    $BEDTOOLS intersect -a $VCF_A -b $BED >> $OUTFN
+    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED >> $OUTFN"
+	>&2 echo Running $CMD
+	eval $CMD
     test_exit_status 
 fi
 
