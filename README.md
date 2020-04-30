@@ -50,11 +50,15 @@ Header of VCF_A and VCF_B is merged by retaining all common fields, appending _A
 FILTER lines which come from VCF_A and VCF_B, respectively.
 ```
 
-## Future work
+## INFO field
 
-Note that errors are not effectively captured here.  For instance, an incorrectly formatted BED file will
-cause this step to quietly fail, emitting header but no variatns, and no error message.  This needs
-to be investigated and errors propagated
+We will append an INFO field identifying whether this is from set A or B as a field,
+    HOTSPOT=A / B
+```
+##INFO=<ID=HOTSPOT,Number=1,Type=Character,Description="Hotspot filter source">
+```
+
+Note that multiple hotspot filters may be used, this will just append their details
 
 # Extra documentation details below
 

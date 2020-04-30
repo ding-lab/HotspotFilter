@@ -172,6 +172,7 @@ if [ ! -z $VCF_B ]; then
     test_exit_status 
 
     # write out header for filter
+    printf "##INFO=<ID=HOTSPOT,Number=1,Type=Character,Description=\"Hotspot filter source\">" >> $OUTFN
     printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED" >> $OUTFN
     test_exit_status 
 
@@ -185,14 +186,19 @@ if [ ! -z $VCF_B ]; then
     # cat <($BEDTOOLS intersect -a $VCF_A -b $BED ) <($BEDTOOLS subtract -a $VCF_B -b $BED ) | $BEDTOOLS sort -i - >> $OUTFN
     # We retain intermediate files
 
+    # adding INFO field here as ";HOTSPOT=A" or ";HOTSPOT=B"
+    # INFO field is column 8 ; https://cseweb.ucsd.edu/classes/sp16/cse182-a/notes/VCFv4.2.pdf
+
 	TMP_A="$OUTD/VCF_A.BED.tmp"
-    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED > $TMP_A"
+
+#   awk from: https://unix.stackexchange.com/questions/148114/how-to-add-words-to-an-existing-column
+    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{$8 = $8 \";HOTSPOT=A\"}1' > $TMP_A"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
 
 	TMP_B="$OUTD/VCF_B.BED.tmp"
-	CMD="$BEDTOOLS subtract -a $VCF_B -b $BED > $TMP_B"
+	CMD="$BEDTOOLS subtract -a $VCF_B -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{$8 = $8 \";HOTSPOT=B\"}1' > $TMP_B"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
