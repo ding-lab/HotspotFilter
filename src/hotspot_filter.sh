@@ -134,22 +134,28 @@ if [ ! -z $VCF_B ]; then
     # from : https://stackoverflow.com/questions/373810/unix-command-to-find-lines-common-in-two-files
 
     awk 'NR==FNR{arr[$0];next} $0 in arr' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_B )  > $OUTFN
+    test_exit_status 
 
     # Next, write out header lines unique to A, with _A appended to ID field
     ##FILTER=<ID=ID,Description="description">
     awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_B ) <( grep "^##" $VCF_A ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_A"; print}' >> $OUTFN
+    test_exit_status 
 
     # Then, write out header lines unique to B, with _B appended to ID field
     awk 'FNR==NR {a[$0]++; next} !a[$0]' <( grep "^##" $VCF_A ) <( grep "^##" $VCF_B ) | awk 'BEGIN{FS=",";OFS=","}{$1=$1"_B"; print}' >> $OUTFN
-    
+    test_exit_status 
+
     # write out header for filter
     printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED" >> $OUTFN
+    test_exit_status 
 
     # Finally, write out CHROM header line
     grep "^#CHROM" $VCF_A >> $OUTFN
+    test_exit_status 
 
     # now write out merged sorted VCF
     cat <($BEDTOOLS intersect -a $VCF_A -b $BED) <($BEDTOOLS subtract -a $VCF_B -b $BED) | $BEDTOOLS sort -i - >> $OUTFN
+    test_exit_status 
 
 else
     >&2 echo Processing VCF_A = $VCF_A
@@ -158,11 +164,15 @@ else
 
     # VCF_B is not specified.  Just write header from VCF_A, add out filter line, and VCF_A which intersects with BED
     grep "^##" $VCF_A > $OUTFN
+    test_exit_status 
 
     printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersect BED.  A=%s, BED=%s\">\n" "$VCF_A" "$BED" >> $OUTFN
+    test_exit_status 
     grep "^#CHROM" $VCF_A >> $OUTFN
+    test_exit_status 
 
     $BEDTOOLS intersect -a $VCF_A -b $BED >> $OUTFN
+    test_exit_status 
 fi
 
 >&2 echo Written to $OUTFN
