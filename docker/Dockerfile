@@ -21,7 +21,7 @@ RUN apt-get update -y && apt-get install -y \
 RUN conda install -c bioconda bedtools
 
 # https://github.com/ding-lab/BreakPointSurveyor
-RUN git clone --recursive https://github.com/ding-lab/BreakPointSurveyor.git
+#RUN git clone --recursive https://github.com/ding-lab/BreakPointSurveyor.git
 
 COPY . /opt/HotspotFilter
 
