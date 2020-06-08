@@ -1,8 +1,8 @@
 # Launch docker environment for testing mutect-tool
 
+source ../../docker/docker_image.sh
 SYSTEM=docker   # MGI and compute1
-IMAGE="mwyczalkowski/hotspot_filter:20200429"
-START_DOCKERD="~/Projects/WUDocker"  # https://github.com/ding-lab/WUDocker.git
+START_DOCKERD="../../docker/WUDocker"  # https://github.com/ding-lab/WUDocker.git
 
 VOLUME_MAPPING="../demo_data:/data"
 

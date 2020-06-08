@@ -7,7 +7,7 @@ VCF_A="/data/VCF_A.varscan_snv_vcf.vcf"
 BED="/data/test.bed"
 OUTD="./out"
 mkdir -p $OUTD
-OUT="$OUTD/Hotspot2.vcf"
+OUT="$OUTD/Hotspot2a.vcf"
 
 /bin/bash /opt/HotspotFilter/src/hotspot_filter.sh -A $VCF_A -D $BED -o $OUT
 
