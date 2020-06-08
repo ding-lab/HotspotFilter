@@ -1,2 +1,3 @@
-IMAGE="mwyczalkowski/hotspot_filter:20200429"
+source docker_image.sh
+
 docker push $IMAGE
