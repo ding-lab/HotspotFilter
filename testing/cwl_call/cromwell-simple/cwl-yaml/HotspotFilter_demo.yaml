@@ -1,5 +1,6 @@
 # Template from cwltool --make-template
 
+keep_only_pass: true
 BED:  # type "File"
     class: File
     path: /gscuser/mwyczalk/projects/TinDaisy/HotspotFilter/testing/demo_data/test.bed
