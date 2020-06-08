@@ -16,6 +16,7 @@ Options:
 -B VCF_B: optional
 -D BED: required
 -o OUTFN: required.  Output file.  
+-R: Retain only variants wit PASS or . in VCF FILTER field
 
 Header of VCF_A and VCF_B is merged by retaining all common fields, appending _A, _B to ID field of
 FILTER lines which come from VCF_A and VCF_B, respectively.
@@ -29,7 +30,7 @@ EOF
 # C) get all lines starting with "##" unique to B, append `_B`, write out
 # D) write out header for filter
 # E) write out CHROM line
-# F) write out sorted VCF
+# F) write out sorted VCF, optionally excluding variants based on value of FILTER field
 
 # specify path explicitly in CWL environment
 BEDTOOLS="/opt/conda/bin/bedtools"
@@ -60,7 +61,7 @@ function test_exit_status {
 }
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":ho:A:B:D:" opt; do
+while getopts ":ho:A:B:D:R" opt; do
   case $opt in
     h)
       echo "$USAGE"
@@ -80,6 +81,9 @@ while getopts ":ho:A:B:D:" opt; do
     D) 
       BED=$OPTARG
       confirm $BED
+      ;;
+    R) 
+      ONLY_PASS=1
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -203,7 +207,13 @@ if [ ! -z $VCF_B ]; then
 	eval $CMD
     test_exit_status 
 
-	CMD="cat $TMP_A $TMP_B | $BEDTOOLS sort -i - >> $OUTFN"
+	CMD="cat $TMP_A $TMP_B | $BEDTOOLS sort -i - "
+    if [ $ONLY_PASS ]; then
+    # command to filter out anything but PASS or . in FILTER column
+        CMD="$CMD | awk 'BEGIN{FS=\"\\t\";OFS=\"\\t\"}{if (\$7 == \"PASS\" || \$7 == \".\") print}' "
+    fi
+
+	CMD="$CMD >> $OUTFN"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
@@ -222,7 +232,13 @@ else
     grep "^#CHROM" $VCF_A >> $OUTFN
     test_exit_status 
 
-    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED >> $OUTFN"
+    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED"
+    if [ $ONLY_PASS ]; then
+    # command to filter out anything but PASS or . in FILTER column
+        CMD="$CMD | awk 'BEGIN{FS=\"\\t\";OFS=\"\\t\"}{if (\$7 == \"PASS\" || \$7 == \".\") print}' "
+    fi
+
+    CMD="$CMD >> $OUTFN"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 

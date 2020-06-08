@@ -20,6 +20,12 @@ inputs:
     inputBinding:
       position: 0
       prefix: '-D'
+  - id: keep_only_pass
+    type: boolean?
+    inputBinding:
+      position: 0
+      prefix: '-R'
+    doc: Retain only variants with FILTER value of PASS or .
 outputs:
   - id: output
     type: File
