@@ -6,7 +6,11 @@ Given a BED file, merges VCF_A and VCF_B where:
 * Retain VCF_A variants within BED
 * Retain VCF_B variants outside of BED
 
+Optionally, excludes variants where FILTER field is not "PASS" or "."
+
 Care is taken to retain header information.
+
+IMAGE="mwyczalkowski/hotspot_filter:20200608"
 
 ## Details
 
