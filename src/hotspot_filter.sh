@@ -196,7 +196,7 @@ if [ ! -z $VCF_B ]; then
 	TMP_A="$OUTD/VCF_A.BED.tmp"
 
 #   awk from: https://unix.stackexchange.com/questions/148114/how-to-add-words-to-an-existing-column
-    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{\$8 = \$8 \";HOTSPOT=A\"; print}' > $TMP_A"
+    CMD="$BEDTOOLS intersect -u -a $VCF_A -b $BED | awk 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{\$8 = \$8 \";HOTSPOT=A\"; print}' > $TMP_A"
 	>&2 echo Running $CMD
 	eval $CMD
     test_exit_status 
@@ -232,7 +232,7 @@ else
     grep "^#CHROM" $VCF_A >> $OUTFN
     test_exit_status 
 
-    CMD="$BEDTOOLS intersect -a $VCF_A -b $BED"
+    CMD="$BEDTOOLS intersect -u -a $VCF_A -b $BED"
     if [ $ONLY_PASS ]; then
     # command to filter out anything but PASS or . in FILTER column
         CMD="$CMD | awk 'BEGIN{FS=\"\\t\";OFS=\"\\t\"}{if (\$7 == \"PASS\" || \$7 == \".\") print}' "
