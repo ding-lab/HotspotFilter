@@ -5,7 +5,8 @@
 
 read -r -d '' USAGE <<'EOF'
 Retain calls from VCF_A which intersect with BED; optionally, retain calls from
-VCF_B which do not intersect with BED
+VCF_B which do not intersect with BED.  Filtered variants may be retained in VCF with FILTER
+field or excluded entirely
 
 Usage:
   my_script.sh [options] ARGS
@@ -16,7 +17,10 @@ Options:
 -B VCF_B: optional
 -D BED: required
 -o OUTFN: required.  Output file.  
--R: Retain only variants wit PASS or . in VCF FILTER field
+-R: Retain variants only with PASS or . in FILTER field
+-r: Retain all variants in A.  Those which fall outside BED have VCF FILTER field with value "hotspot" appended
+   This option ignored if VCF_B is specified
+-F FILTER_NAME: specify filter name in VCF file.  Default is 'hotspot'
 
 Header of VCF_A and VCF_B is merged by retaining all common fields, appending _A, _B to ID field of
 FILTER lines which come from VCF_A and VCF_B, respectively.
@@ -30,7 +34,7 @@ EOF
 # C) get all lines starting with "##" unique to B, append `_B`, write out
 # D) write out header for filter
 # E) write out CHROM line
-# F) write out sorted VCF, optionally excluding variants based on value of FILTER field
+# F) perform bedtools operations on VCF files as appropriate
 
 # specify path explicitly in CWL environment
 BEDTOOLS="/opt/conda/bin/bedtools"
@@ -60,8 +64,9 @@ function test_exit_status {
     done
 }
 
+FILTER_NAME="hotspot"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":ho:A:B:D:R" opt; do
+while getopts ":ho:A:B:D:RrF:" opt; do
   case $opt in
     h)
       echo "$USAGE"
@@ -84,6 +89,12 @@ while getopts ":ho:A:B:D:R" opt; do
       ;;
     R) 
       ONLY_PASS=1
+      ;;
+    r) 
+      RETAIN_ALL=1
+      ;;
+    F) 
+      FILTER_NAME=$OPTARG
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -160,6 +171,11 @@ if [ ! -z $VCF_B ]; then
     >&2 echo Processing VCF_A = $VCF_A
     >&2 echo VCF_B = $VCF_B
     >&2 echo BED = $BED
+    if [ $ONLY_PASS ]; then
+        >&2 echo Retaining only FILTER = PASS variants
+    echo
+        >&2 echo Retaining all variants regardless FILTER 
+    fi
     # First, write out common header lines
     # from : https://stackoverflow.com/questions/373810/unix-command-to-find-lines-common-in-two-files
 
@@ -177,7 +193,7 @@ if [ ! -z $VCF_B ]; then
 
     # write out header for filter
     printf "##INFO=<ID=HOTSPOT,Number=1,Type=Character,Description=\"Hotspot filter source\">\n" >> $OUTFN
-    printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED \n" >> $OUTFN
+    printf "##FILTER=<ID=$FILTER_NAME,Description=\"Retaining calls where A intersects with BED and B does not intersect with BED.  A=%s, B=%s, BED=%s\">\n" "$VCF_A" "$VCF_B" "$BED \n" >> $OUTFN
     test_exit_status 
 
     # Finally, write out CHROM header line
@@ -222,17 +238,55 @@ else
     >&2 echo Processing VCF_A = $VCF_A
     >&2 echo BED = $BED
     >&2 echo VCF_B not provided
+    if [ $ONLY_PASS ]; then
+        >&2 echo Retaining only FILTER = PASS variants
+    echo
+        >&2 echo Retaining all variants regardless FILTER 
+    fi
 
     # VCF_B is not specified.  Just write header from VCF_A, add out filter line, and VCF_A which intersects with BED
     grep "^##" $VCF_A > $OUTFN
     test_exit_status 
 
-    printf "##FILTER=<ID=hotspot,Description=\"Retaining calls where A intersect BED.  A=%s, BED=%s\">\n" "$VCF_A" "$BED" >> $OUTFN
+    printf "##FILTER=<ID=$FILTER_NAME,Description=\"Retaining calls where A intersect BED.  A=%s, BED=%s\">\n" "$VCF_A" "$BED" >> $OUTFN
     test_exit_status 
     grep "^#CHROM" $VCF_A >> $OUTFN
     test_exit_status 
 
-    CMD="$BEDTOOLS intersect -u -a $VCF_A -b $BED"
+    if [ -z $RETAIN_ALL ]; then
+        >&2 echo Simple intersect
+        # do a simple BED intersect
+        CMD="$BEDTOOLS intersect -u -a $VCF_A -b $BED"
+    else
+        >&2 echo Retain all variants, indicate exclusion in FILTER field
+        # we want to retain all variants in VCF_A, but indicate in FILTER column if has failed filter
+        # processing here is similar to that for VCF_A and VCF_B logic
+        TMP_A="$OUTD/VCF_A.BED.tmp"
+
+        CMD="$BEDTOOLS intersect -u -a $VCF_A -b $BED  > $TMP_A"
+        >&2 echo Running $CMD
+        eval $CMD
+        test_exit_status 
+
+        # this is the inverse, those excluded.  We want to set FILTER to filter name if no other filters,
+        # othewise add filter name to existing filter(s), semicolon-separated
+        # AWK Logic of variants outside of BED, with FILTER = $7
+        # if $7 == "PASS" or "." then $7 = "FILTER_NAME" ; else $7 = $7 + ";FILTER_NAME" 
+        TMP_B="$OUTD/VCF_AA.BED.tmp"
+        CMD="$BEDTOOLS intersect -v -a $VCF_A -b $BED | awk -v fn=$FILTER_NAME 'BEGIN{FS=\"\\t\"; OFS=\"\\t\"}{if (\$7 == \".\" || \$7 == \"PASS\") {\$7 = fn} else {\$7 = \$7 \";\"fn }; print }' > $TMP_B"
+        >&2 echo Running $CMD
+        eval $CMD
+        test_exit_status 
+
+        CMD="cat $TMP_A $TMP_B | $BEDTOOLS sort -i - "
+
+        CMD="$CMD >> $OUTFN"
+        >&2 echo Running $CMD
+        eval $CMD
+        test_exit_status 
+
+    fi
+
     if [ $ONLY_PASS ]; then
     # command to filter out anything but PASS or . in FILTER column
         CMD="$CMD | awk 'BEGIN{FS=\"\\t\";OFS=\"\\t\"}{if (\$7 == \"PASS\" || \$7 == \".\") print}' "

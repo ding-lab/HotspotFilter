@@ -26,6 +26,18 @@ inputs:
       position: 0
       prefix: '-R'
     doc: Retain only variants with FILTER value of PASS or .
+  - id: retain_all
+    type: boolean?
+    inputBinding:
+      position: 0
+      prefix: '-r'
+    doc: Retain all variants in A, mark exclusions with VCF FILTER field. Ignored if VCF_B specified
+  - id: filter_name
+    type: string
+    inputBinding:
+      position: 0
+      prefix: '-F'
+    doc: specify filter name in VCF file.  Default is 'hotspot'
 outputs:
   - id: output
     type: File
@@ -40,4 +52,4 @@ requirements:
   - class: ResourceRequirement
     ramMin: 1000
   - class: DockerRequirement
-    dockerPull: 'mwyczalkowski/hotspot_filter:20200616'
+    dockerPull: 'mwyczalkowski/hotspot_filter:20200617'
