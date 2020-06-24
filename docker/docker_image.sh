@@ -1,2 +1,2 @@
-IMAGE="mwyczalkowski/hotspot_filter:20200617"
+IMAGE="mwyczalkowski/hotspot_filter:20200624"
 

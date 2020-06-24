@@ -280,11 +280,6 @@ else
 
         CMD="cat $TMP_A $TMP_B | $BEDTOOLS sort -i - "
 
-        CMD="$CMD >> $OUTFN"
-        >&2 echo Running $CMD
-        eval $CMD
-        test_exit_status 
-
     fi
 
     if [ $ONLY_PASS ]; then
