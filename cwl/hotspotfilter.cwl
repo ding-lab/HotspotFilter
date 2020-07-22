@@ -33,7 +33,7 @@ inputs:
       prefix: '-r'
     doc: Retain all variants in A, mark exclusions with VCF FILTER field. Ignored if VCF_B specified
   - id: filter_name
-    type: string
+    type: string?
     inputBinding:
       position: 0
       prefix: '-F'
