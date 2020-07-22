@@ -52,4 +52,4 @@ requirements:
   - class: ResourceRequirement
     ramMin: 1000
   - class: DockerRequirement
-    dockerPull: 'mwyczalkowski/hotspot_filter:20200617'
+    dockerPull: 'mwyczalkowski/hotspot_filter:20200624'
